@@ -242,7 +242,7 @@ class IntegerFits
     : public All<
           std::is_integral<T>,
           std::is_integral<Destination>,
-          Bool<(BitSize<T>::value <= BitSize<Destination>::value)>> {
+          Bool< (BitSize<T>::value <= BitSize<Destination>::value)> > {
 };
 
 /// @brief Makes an integral type either signed or unsigned based upon the
@@ -358,33 +358,33 @@ namespace detail {
 template <typename Type, Type value_, class Enable = void>
 struct BitScanForward {
   static constexpr const unsigned int value =
-      1 + BitScanForward<Type,(value_ >> 1)>::value;
+      1 + BitScanForward<Type, (value_ >> 1)>::value;
 };
 
 template <typename Type, Type value_>
-struct BitScanForward<Type,value_,EnableIf<Bool<value_ & 0x1>,void>> {
+struct BitScanForward<Type, value_, EnableIf<Bool<value_ & 0x1>>> {
   static constexpr const unsigned int value = 0;
 };
 
 // Negative
 template <typename Type, Type value_>
-struct BitScanForward<Type,value_,EnableIf<Bool<(value_ < 0)>>> {
+struct BitScanForward<Type, value_, EnableIf<Bool<(value_ < 0)>>> {
   static constexpr const unsigned int value =
       BitScanForward<typename std::make_unsigned<Type>::type,
           static_cast<typename std::make_unsigned<Type>::type>(value_)>::value;
 };
 // The value '0' makes no sense for this operation.
 template <typename Type, Type value_>
-struct BitScanForward<Type,value_,EnableIf<Bool<value_ == 0>,void>> {
-  static constexpr const unsigned int value = 0; // defined to reduce errors
-  static_assert(sizeof(Type) < 0,"Argh.");
+struct BitScanForward<Type, value_, EnableIf<Bool<value_ == 0>>> {
+  static constexpr const unsigned int value = 0;  // defined to reduce errors
+  static_assert(sizeof(Type) < 0, "Argh.");
 };
 
 }  // namespace detail
 /// @endcond
 
 template <typename Type, Type value_>
-struct BitScanForward : public detail::BitScanForward<Type,value_> {
+struct BitScanForward : public detail::BitScanForward<Type, value_> {
 };
 
 /// @cond nx_detail
@@ -393,9 +393,9 @@ namespace detail {
 template <typename Type, Type value, class Enable = void>
 struct LowestBitRun {
   static constexpr const Type offset =
-      BitScanForward<Type,value>::value;
+      BitScanForward<Type, value>::value;
   static constexpr const Type length =
-      BitScanForward<Type,(~(value >> offset))>::value;
+      BitScanForward<Type, (~(value >> offset))>::value;
 };
 template <typename Type, Type value>
 struct LowestBitRun<Type, value, EnableIf<Bool<value == 0>>> {
@@ -406,7 +406,7 @@ struct LowestBitRun<Type, value, EnableIf<Bool<value == 0>>> {
 }  // namespace detail
 
 template <typename Type, Type value>
-struct LowestBitRun : public detail::LowestBitRun<Type,value> {
+struct LowestBitRun : public detail::LowestBitRun<Type, value> {
 };
 
 }  // namespace mpl
@@ -416,11 +416,11 @@ namespace detail {
 
 template <typename Type, Type mask_, Type bits_>
 class BitValueBase {
-  public:
-    typedef Type value_type;
-    static constexpr const value_type mask = mask_;
-    static constexpr const value_type bits = bits_;
-    static_assert((bits_ & mask_) == bits_, "Unreferenced set bits in value.");
+ public:
+  typedef Type value_type;
+  static constexpr const value_type mask = mask_;
+  static constexpr const value_type bits = bits_;
+  static_assert((bits_ & mask_) == bits_, "Unreferenced set bits in value.");
 };
 
 // multiple set bits, but not all
@@ -478,7 +478,7 @@ class BitValue<Type, mask_, bits_,
 
 template <typename Type, Type mask_, Type value_, class Enable = void>
 class BitField
-    : public BitValue<Type,mask_,
+    : public BitValue<Type, mask_,
         ((value_ &
             mpl::LowBitMask<
                 Type, mpl::LowestBitRun<Type, mask_>::length>::value)
@@ -487,12 +487,11 @@ class BitField
             mpl::LowBitMask<
                 Type, mpl::LowestBitRun<Type, mask_>::length>::value
             << mpl::LowestBitRun<Type, mask_>::offset)),
-            (value_ >> mpl::LowestBitRun<Type, mask_>::length)>::bits>
-          {
+            (value_ >> mpl::LowestBitRun<Type, mask_>::length)>::bits> {
 };
 template <typename Type, Type mask_, Type value_>
 class BitField<Type, mask_, value_, EnableIf<Bool<mask_ == 0>>>
-    : public BitValue<Type,0,0> {
+    : public BitValue<Type, 0, 0> {
   // slightly different check than the one in BitValue
   static_assert(value_ == 0, "Extra unused set bits in value.");
 };

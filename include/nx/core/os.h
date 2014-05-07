@@ -20,6 +20,8 @@
 #ifndef INCLUDE_NX_CORE_OS_H_
 #define INCLUDE_NX_CORE_OS_H_
 
+#include <limits.h>  // CHAR_BIT and PATH_MAX (on linux)
+
 // Toolchain detection
 #if defined(__clang__)
   /// @brief Set if the toolchain in use is Clang
@@ -72,7 +74,7 @@
 #elif defined(__SVR4) && defined(__sun)
   /// @brief Defined if build target is Solaris
   #define NX_TARGET_SOLARIS 1
-#elif defined (__AVR__)
+#elif defined(__AVR__)
   /// @brief Defined if build target is AVR
   #define NX_TARGET_AVR 1
   /// @brief Defined if build target is an embedded platform
@@ -155,19 +157,14 @@
     #define PATH_MAX MAX_PATH
   #endif
 #else
-  #include <limits.h>
   /// @brief Best guess per platform includes as to the maximum length of a
   /// path.
   #define MAX_PATH PATH_MAX
 #endif
 
 #ifndef CHAR_BIT
-  #include <limits.h>  // just for CHAR_BIT
-
-  #ifndef CHAR_BIT
-    #error "header <limits.h> does not define CHAR_BIT, either explicitly " \
-        "define it here or include the appropriate header!"
-  #endif
+  #error "header <limits.h> does not define CHAR_BIT, either explicitly " \
+      "define it here or include the appropriate header!"
 #endif
 
 #endif  // INCLUDE_NX_CORE_OS_H_

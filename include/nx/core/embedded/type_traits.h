@@ -20,10 +20,10 @@
 /// due to the faulty rationale of C programmers writing off useful libraries
 /// as unnecessary.
 
-#ifndef INCLUDED_NX_EMBEDDED_TYPE_TRAITS_H_
-#define INCLUDED_NX_EMBEDDED_TYPE_TRAITS_H_
+#ifndef INCLUDE_NX_CORE_EMBEDDED_TYPE_TRAITS_H_
+#define INCLUDE_NX_CORE_EMBEDDED_TYPE_TRAITS_H_
 
-#include <stddef.h> // size_t
+#include <stddef.h>  // size_t
 
 namespace std {
 
@@ -91,7 +91,7 @@ struct is_void : integral_constant<bool,
 };
 
 template <class T>
-struct is_null_pointer : is_same<typename remove_cv<T>::type,nullptr_t> {
+struct is_null_pointer : is_same<typename remove_cv<T>::type, nullptr_t> {
 };
 
 template<class T>
@@ -148,7 +148,7 @@ template <class T> struct is_unsigned
     : detail::is_unsigned_helper<typename remove_cv<T>::type> {
 };
 namespace detail {
-  template <class T,class Enable = void>
+  template <class T, class Enable = void>
   struct make_unsigned;
 
   template <class T> struct make_unsigned<T,
@@ -163,7 +163,7 @@ namespace detail {
   template <> struct make_unsigned<signed long long> {
       typedef unsigned long long type; };
 
-  template <class T,class Enable = void>
+  template <class T, class Enable = void>
   struct make_signed;
 
   template <class T> struct make_signed<T,
@@ -179,17 +179,17 @@ namespace detail {
   template <> struct make_signed<unsigned long long> {
       typedef signed long long type; };
 
-  // TODO: put this somewhere better?
-  template <class T,class V> struct match_cv {
+  // TODO(nacitar): put this somewhere better?
+  template <class T, class V> struct match_cv {
     typedef typename remove_cv<V>::type type;
   };
-  template <class T,class V> struct match_cv<const volatile T,V> {
+  template <class T, class V> struct match_cv<const volatile T, V> {
     typedef typename add_cv<V>::type type;
   };
-  template <class T,class V> struct match_cv<volatile T,V> {
+  template <class T, class V> struct match_cv<volatile T, V> {
     typedef typename add_volatile<typename remove_const<V>::type>::type type;
   };
-  template <class T,class V> struct match_cv<const T,V> {
+  template <class T, class V> struct match_cv<const T, V> {
     typedef typename add_const<typename remove_volatile<V>::type>::type type;
   };
 }  // namespace detail
@@ -265,7 +265,7 @@ template<class T> struct is_volatile             : false_type {};
 template<class T> struct is_volatile<volatile T> : true_type {};
 
 template< class T >
-struct alignment_of : integral_constant<size_t,alignof(T)> {};
+struct alignment_of : integral_constant<size_t, alignof(T)> {};
 
 template<class T>
 struct rank : integral_constant<size_t, 0> {};
@@ -337,7 +337,7 @@ struct add_rvalue_reference_helper<T, true> {
   typedef T&& type;
 };
 
-} // namespace type_traits_detail
+}  // namespace type_traits_detail
 
 template <typename T>
 struct add_rvalue_reference {
@@ -401,4 +401,4 @@ struct is_member_object_pointer : std::integral_constant<bool,
 
 }  // namespace std
 
-#endif  // INCLUDED_NX_EMBEDDED_TYPE_TRAITS_H_
+#endif  // INCLUDE_NX_CORE_EMBEDDED_TYPE_TRAITS_H_
