@@ -404,6 +404,7 @@ struct LowestBitRun<Type, value, EnableIf<Bool<value == 0>>> {
 };
 
 }  // namespace detail
+/// @endcond
 
 template <typename Type, Type value>
 struct LowestBitRun : public detail::LowestBitRun<Type, value> {
