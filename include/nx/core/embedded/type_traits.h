@@ -102,20 +102,61 @@ template<class T, size_t N>
 struct is_array<T[N]> : true_type {};
 
 namespace detail {
-  template <class T> struct is_integral_helper : false_type { };
-  template <> struct is_integral_helper<char> : true_type { };
-  template <> struct is_integral_helper<char16_t> : true_type { };
-  template <> struct is_integral_helper<char32_t> : true_type { };
-  template <> struct is_integral_helper<signed char> : true_type { };
-  template <> struct is_integral_helper<unsigned char> : true_type { };
-  template <> struct is_integral_helper<signed short> : true_type { };
-  template <> struct is_integral_helper<unsigned short> : true_type { };
-  template <> struct is_integral_helper<signed int> : true_type { };
-  template <> struct is_integral_helper<unsigned int> : true_type { };
-  template <> struct is_integral_helper<signed long> : true_type { };
-  template <> struct is_integral_helper<unsigned long> : true_type { };
-  template <> struct is_integral_helper<signed long long> : true_type { };
-  template <> struct is_integral_helper<unsigned long long> : true_type {
+  template <class T>
+  struct is_integral_helper
+      : false_type {
+  };
+  template <>
+  struct is_integral_helper<char>
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<char16_t>
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<char32_t>
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<signed char>
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<unsigned char>
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<signed short>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<unsigned short>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<signed int>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<unsigned int>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<signed long>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<unsigned long>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<signed long long>  // NOLINT(runtime/int)
+      : true_type {
+  };
+  template <>
+  struct is_integral_helper<unsigned long long>  // NOLINT(runtime/int)
+      : true_type {
   };
 }  // namespace detail
 template <class T> struct is_integral
@@ -158,10 +199,12 @@ namespace detail {
   template <> struct make_unsigned<char> { typedef unsigned char type; };
   template <> struct make_unsigned<signed char> { typedef unsigned char type; };
   template <> struct make_unsigned<signed int> { typedef unsigned int type; };
-  template <> struct make_unsigned<signed long> {
-      typedef unsigned long type; };
-  template <> struct make_unsigned<signed long long> {
-      typedef unsigned long long type; };
+  template <> struct make_unsigned<signed long> {  // NOLINT(runtime/int)
+      typedef unsigned long type;  // NOLINT(runtime/int)
+  };
+  template <> struct make_unsigned<signed long long> {  // NOLINT(runtime/int)
+      typedef unsigned long long type;  // NOLINT(runtime/int)
+  };
 
   template <class T, class Enable = void>
   struct make_signed;
@@ -174,10 +217,12 @@ namespace detail {
   template <> struct make_signed<char> { typedef signed char type; };
   template <> struct make_signed<unsigned char> { typedef signed char type; };
   template <> struct make_signed<unsigned int> { typedef signed int type; };
-  template <> struct make_signed<unsigned long> {
-      typedef signed long type; };
-  template <> struct make_signed<unsigned long long> {
-      typedef signed long long type; };
+  template <> struct make_signed<unsigned long> {  // NOLINT(runtime/int)
+      typedef signed long type;  // NOLINT(runtime/int)
+  };
+  template <> struct make_signed<unsigned long long> {  // NOLINT(runtime/int)
+      typedef signed long long type;  // NOLINT(runtime/int)
+  };
 
   // TODO(nacitar): put this somewhere better?
   template <class T, class V> struct match_cv {
