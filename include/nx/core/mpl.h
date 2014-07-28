@@ -432,13 +432,45 @@ class BitValueBase {
   static_assert((bits_ & mask_) == bits_, "Unreferenced set bits in value.");
 };
 
-// multiple set bits, but not all
+// NOTE: in the case of 2-bit masks, you get slightly smaller assembly on AVR
+// if you perform the bit operations separately, as these operations can be
+// done without loading values into a register.  Probably best to not optimize
+// for that, though.
 template <typename Type, Type mask_, Type bits_, class Enable = void>
 class BitValue : public BitValueBase<Type, mask_, bits_> {
  public:
   template <class PointerType>
   static NX_FORCEINLINE void set(PointerType* data) {
     *data = bits_ | (*data & ~mask_);
+  }
+};
+
+// multiple set bits, but all are 0
+template <typename Type, Type mask_, Type bits_>
+class BitValue<Type, mask_, bits_, EnableIf<
+    Bool<
+      mask_ != 0 && ~mask_ != 0 &&
+      !mpl::IsPowerOfTwo<Type, mask_>::value &&
+      (mask_ & bits_) == 0>>>
+    : public BitValueBase<Type, mask_, bits_> {
+ public:
+  template <class PointerType>
+  static NX_FORCEINLINE void set(PointerType* data) {
+    *data &= ~mask_;
+  }
+};
+// multiple set bits, but all are 1
+template <typename Type, Type mask_, Type bits_>
+class BitValue<Type, mask_, bits_, EnableIf<
+    Bool<
+      mask_ != 0 && ~mask_ != 0 &&
+      !mpl::IsPowerOfTwo<Type, mask_>::value &&
+      (mask_ & bits_) == mask_>>>
+    : public BitValueBase<Type, mask_, bits_> {
+ public:
+  template <class PointerType>
+  static NX_FORCEINLINE void set(PointerType* data) {
+    *data |= mask_;
   }
 };
 
@@ -452,7 +484,7 @@ class BitValue<Type, mask_, bits_, EnableIf<Bool<mask_ == 0>>>
     /* NOOP */
   }
 };
-// all bits in mask
+// all bits are in the mask
 template <typename Type, Type mask_, Type bits_>
 class BitValue<Type, mask_, bits_, EnableIf<Bool<~mask_ == 0>>>
     : public BitValueBase<Type, mask_, bits_> {
