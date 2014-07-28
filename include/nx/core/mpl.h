@@ -377,12 +377,15 @@ struct BitScanForward<Type, value_, EnableIf<Bool<(value_ < 0)>>> {
 template <typename Type, Type value_>
 struct BitScanForward<Type, value_, EnableIf<Bool<value_ == 0>>> {
   static constexpr const unsigned int value = 0;  // defined to reduce errors
-  static_assert(sizeof(Type) < 0, "Argh.");
+  static_assert(DependentBool<false,Type>::value,
+      "No reasonable result can be logically provided for a value of 0.");
 };
 
 }  // namespace detail
 /// @endcond
 
+/// @brief Performs the BitScanForward operation, providing the index of the
+/// lowest set bit.
 template <typename Type, Type value_>
 struct BitScanForward : public detail::BitScanForward<Type, value_> {
 };
@@ -397,6 +400,7 @@ struct LowestBitRun {
   static constexpr const Type length =
       BitScanForward<Type, (~(value >> offset))>::value;
 };
+
 template <typename Type, Type value>
 struct LowestBitRun<Type, value, EnableIf<Bool<value == 0>>> {
   static constexpr const Type offset = 0;
@@ -406,6 +410,10 @@ struct LowestBitRun<Type, value, EnableIf<Bool<value == 0>>> {
 }  // namespace detail
 /// @endcond
 
+/// @brief Provides the bit offset of the lowest set bit (BitScanForward) and
+/// the length of the run of adjacent set bits.  That is to say, if the lowest
+/// set bit has two other set bits adjacent to it in higher positions, the
+/// length of this "run" will be 3.
 template <typename Type, Type value>
 struct LowestBitRun : public detail::LowestBitRun<Type, value> {
 };
@@ -500,12 +508,40 @@ class BitField<Type, mask_, value_, EnableIf<Bool<mask_ == 0>>>
 }  // namespace detail
 /// @endcond
 
+
+/// @brief Allows the specification of a bit mask by providing the indexes of
+/// the set bits.
+template <typename Type, unsigned int index_, unsigned int ... Indexes>
+class BitMask {
+ public:
+  typedef Type value_type;
+  static constexpr value_type value =
+      BitMask<Type, Indexes...>::value | BitMask<Type, index_>::value;
+      static_assert(!(
+          BitMask<Type, Indexes...>::value &
+          BitMask<Type, index_>::value),"Bit specified multiple times.");
+};
+
+template <typename Type, unsigned int index_>
+class BitMask<Type, index_> {
+ public:
+  typedef Type value_type;
+  static constexpr value_type value = (static_cast<value_type>(1u) << index_);
+};
+/// @brief Lets you specify a mask and a value where the bits of the value that
+/// are set in the mask will be assignable to a value with set().
 template <typename Type, Type mask_, Type value_>
 class BitValue : public detail::BitValue<Type, mask_, value_> {
 };
+/// @brief Lets you specify a mask and a value, where if the mask has N set
+/// bits, the lowest N bits of the value will be used to set those masked bits
+/// when assigning them to a value with set().
 template <typename Type, Type mask_, Type value_>
 class BitField : public detail::BitField<Type, mask_, value_> {
 };
+
+/// @brief Combines multiple bitmasks and their values into a single larger
+/// mask such that assignment of those bits can be done in a single operation.
 template <typename Mask, typename ... Masks>
 class BitTransaction
     : public BitValue<typename Mask::value_type,
