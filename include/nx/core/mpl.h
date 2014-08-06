@@ -83,18 +83,6 @@ using Function = Return (*)(Arguments...);
 template <typename Return, typename Class, typename... Arguments>
 using MemberFunction = Return (Class::*)(Arguments...);
 
-/// @brief Simple wrapper around an integral constant.  Can be used to make a
-/// value depend upon a template parameter by passing the types as additional
-/// arguments to the template.
-template<typename T, T kValue, typename...>
-class DependentIntegralConstant : public std::integral_constant<T, kValue> {
-};
-
-/// @brief A dependent boolean type
-template <bool kValue, typename... T>
-class DependentBool : public DependentIntegralConstant<bool, kValue, T...> {
-};
-
 // No need to invoke integral constants... they resolve to themselves!
 
 /// @brief Meta-constant boolean
@@ -118,6 +106,17 @@ class True : public Bool<true> {
 
 /// @brief Meta-constant false value; equivalent to std::false_type
 class False : public Bool<false> {
+};
+
+/// @brief Accepts a type and optionally values of that type as template
+/// parameters.  Can be used to make a boolean condition dependent upon an
+/// arbitrary template parameter by adding to it: && Depend<Type>::value
+/// @details Other than the template arguments, Identical to the "True" type.
+template <class T, T... values>
+class Depend : public True {
+};
+template <class T>
+class Depend<T> : public True {
 };
 
 /// @brief Basic identity metafunction; provides the type unaltered. Useful for
@@ -199,8 +198,7 @@ class CheckValidType<true, InvalidType, Fallback> : public Bool<false> {
  public:
   /// @brief Fallback, because T is not InvalidType
   typedef Fallback type;
-  static_assert(
-      DependentBool<false, Fallback>::value,
+  static_assert(false && Depend<Fallback>::value,
       "No type exists that fulfills the specified requirements.");
 };
 
@@ -312,8 +310,8 @@ template <typename T, unsigned int kBits, bool kAllowPartial>
 class LowBitMaskInternal<
     T, kBits, kAllowPartial,
     EnableIf<Not<std::is_integral<T>>>> : public UInt<0> {
-  static_assert(
-      DependentBool<false, T>::value, "The provided type is not integral.");
+  static_assert(false && Depend<T>::value,
+      "The provided type is not integral.");
 };
 
 template <typename T, unsigned int kBits, bool kAllowPartial>
@@ -339,8 +337,7 @@ class LowBitMaskInternal<
     T, kBits, false,
     EnableIf<All<std::is_integral<T>, Bool<(kBits > BitSize<T>::value)>>>>
     : public std::integral_constant<T, 0> {
-  static_assert(
-      DependentBool<false, T>::value,
+  static_assert(false && Depend<T>::value,
       "This type does not have enough bits to hold a mask of this size.");
 };
 
@@ -377,7 +374,7 @@ struct BitScanForward<Type, value_, EnableIf<Bool<(value_ < 0)>>> {
 template <typename Type, Type value_>
 struct BitScanForward<Type, value_, EnableIf<Bool<value_ == 0>>> {
   static constexpr const unsigned int value = 0;  // defined to reduce errors
-  static_assert(DependentBool<false,Type>::value,
+  static_assert(false && Depend<Type>::value,
       "No reasonable result can be logically provided for a value of 0.");
 };
 
@@ -422,6 +419,10 @@ struct LowestBitRun : public detail::LowestBitRun<Type, value> {
 
 /// @cond nx_detail
 namespace detail {
+
+
+
+
 
 template <typename Type, Type mask_, Type bits_>
 class BitValueBase {
@@ -540,6 +541,87 @@ class BitField<Type, mask_, value_, EnableIf<Bool<mask_ == 0>>>
 }  // namespace detail
 /// @endcond
 
+
+
+template <typename Type, Type mask_>
+class Bits {
+ public:
+  template <Type value_, class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ == static_cast<Type>(0) && // empty
+          Depend<PointerType>::value>,
+      void> assign(PointerType* data) {
+    // empty mask - do nothing
+  }
+  template <Type value_, class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ == ~static_cast<Type>(0) && // full
+          Depend<PointerType>::value>,
+      void> assign(PointerType* data) {
+    // full mask - assign
+    *data = value_;
+  }
+  template <Type value_, class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ != static_cast<Type>(0) && // not empty
+          mask_ != ~static_cast<Type>(0) && // not full
+          (mask_ & value_) == mask_ && // all bits set
+          Depend<PointerType>::value>,
+      void> assign(PointerType* data) {
+    // bit mask, all bits set - or
+    *data |= mask_;
+  }
+  template <Type value_, class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ != static_cast<Type>(0) && // not empty
+          mask_ != ~static_cast<Type>(0) && // not full
+          (mask_ & value_) == static_cast<Type>(0) && // all bits unset
+          Depend<PointerType>::value>,
+      void> assign(PointerType* data) {
+    // bit mask, all bits unset - and inverted mask
+    *data &= ~mask_;
+  }
+  template <Type value_, class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ != static_cast<Type>(0) && // not empty
+          mask_ != ~static_cast<Type>(0) && // not full
+          (mask_ & value_) != static_cast<Type>(0) && // all bits not unset
+          (mask_ & value_) != mask_ && // all bits not set
+          Depend<PointerType>::value>,
+      void> assign(PointerType* data) {
+    // being extra sure that the 'and' is optimized out
+    typedef std::integral_constant<Type,(value_ & mask_)> masked_value;
+    // bit mask, bits not all the same - merge bits
+    *data = masked_value::value | (*data & ~mask_);
+  }
+
+  ////
+  // DYNAMIC
+  template <class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ == static_cast<Type>(0) && // empty
+          Depend<PointerType>::value>,
+      void> assign(Type value, PointerType* data) {
+    // empty mask - do nothing
+  }
+  template <class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ == ~static_cast<Type>(0) && // full
+          Depend<PointerType>::value>,
+      void> assign(Type value, PointerType* data) {
+    // full mask - assign
+    *data = value;
+  }
+  template <class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ != static_cast<Type>(0) && // not empty
+          mask_ != ~static_cast<Type>(0) && // not full
+          Depend<PointerType>::value>,
+      void> assign(Type value, PointerType* data) {
+    // bit mask - merge bits
+    *data = (value & mask_) | (*data & ~mask_);
+  }
+};
 
 /// @brief Allows the specification of a bit mask by providing the indexes of
 /// the set bits.
