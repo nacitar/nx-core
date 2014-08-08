@@ -47,6 +47,14 @@
 #elif defined(_MSC_VER)
   /// @brief Set if the toolchain in use is visual studio
   #define NX_TC_VS 1
+  #include <intrin.h> // compiler intrinsics
+  #pragma intrinsic(_BitScanForward)
+  #pragma intrinsic(_BitScanForward64)
+  #pragma intrinsic(_BitScanReverse)
+  #pragma intrinsic(_BitScanReverse64)
+  #pragma intrinsic(__popcnt)
+  #pragma intrinsic(__popcnt16)
+  #pragma intrinsic(__popcnt64)
 #endif
 
 // C++11 requirement

@@ -24,5 +24,6 @@
 #include "nx/core/os.h"
 #include "nx/core/mpl.h"
 #include "nx/core/integer.h"
+#include "nx/core/bits.h"
 
 #endif  // INCLUDE_NX_CORE_H_

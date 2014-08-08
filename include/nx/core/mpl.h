@@ -543,9 +543,34 @@ class BitField<Type, mask_, value_, EnableIf<Bool<mask_ == 0>>>
 
 
 
-template <typename Type, Type mask_>
+template <typename Type, Type mask_ = ~static_cast<Type>(0)>
 class Bits {
  public:
+  static constexpr const Type mask = mask_;
+  typedef Type type;
+
+  template <Type value_>
+  static NX_FORCEINLINE constexpr EnableIf<Bool<value_ != 0>,Type> toField() {
+    return std::integral_constant<Type,
+        ((value_ &
+            mpl::LowBitMask<
+                Type, mpl::LowestBitRun<Type, mask_>::length>::value)
+            << mpl::LowestBitRun<Type, mask_>::offset) |
+        Bits<Type, (mask_ & ~(
+            mpl::LowBitMask<
+                Type, mpl::LowestBitRun<Type, mask_>::length>::value
+            << mpl::LowestBitRun<Type, mask_>::offset))>::template toField<
+            (value_ >> mpl::LowestBitRun<Type, mask_>::length)>()
+        >::value;
+  }
+
+
+  template <Type value_>
+  static NX_FORCEINLINE constexpr EnableIf<Bool<value_ == 0>,Type> toField() {
+    return static_cast<Type>(0);
+  }
+  ////
+  // ASSIGN
   template <Type value_, class PointerType>
   static NX_FORCEINLINE EnableIf<Bool<
           mask_ == static_cast<Type>(0) && // empty
@@ -595,6 +620,46 @@ class Bits {
     *data = masked_value::value | (*data & ~mask_);
   }
 
+
+  ////
+  // GET
+  template <class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ == static_cast<Type>(0) && // empty
+          Depend<PointerType>::value>,
+      Type> get(PointerType* data) {
+    // empty mask - return nothing
+    return static_cast<Type>(0);
+  }
+  template <class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ == ~static_cast<Type>(0) && // full
+          Depend<PointerType>::value>,
+      Type> get(PointerType* data) {
+    // full mask - return value
+    return *data;
+  }
+  template <class PointerType>
+  static NX_FORCEINLINE EnableIf<Bool<
+          mask_ != static_cast<Type>(0) && // not empty
+          mask_ != ~static_cast<Type>(0) && // not full
+          Depend<PointerType>::value>,
+      Type> get(PointerType* data) {
+    // bit mask - return bits
+    return (*data & mask_);
+  }
+
+  ////
+  // SET/CLEAR OPERATIONS
+  template <class PointerType>
+  static NX_FORCEINLINE void set(PointerType* data) {
+    assign<~static_cast<Type>(0)>(data);
+  }
+  template <class PointerType>
+  static NX_FORCEINLINE void clear(PointerType* data) {
+    assign<static_cast<Type>(0)>(data);
+  }
+
   ////
   // DYNAMIC
   template <class PointerType>
@@ -621,6 +686,9 @@ class Bits {
     // bit mask - merge bits
     *data = (value & mask_) | (*data & ~mask_);
   }
+
+ private:
+  NX_UNINSTANTIABLE(Bits);
 };
 
 /// @brief Allows the specification of a bit mask by providing the indexes of
