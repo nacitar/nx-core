@@ -29,6 +29,7 @@
 #endif
 
 #include "nx/core/mpl.h"
+#include "nx/core/bits.h"
 
 /// @brief Library namespace.
 namespace nx {
@@ -102,20 +103,20 @@ class IntegralLeastRangeSearch
         Invoke<PreferIntegralType<
           Invoke<PreferIntegralType<
             Conditional<
-              BitRange<char, kBitMin, kBitMax>,
+              Bool<bits::InRange<char, kBitMin, kBitMax>()>,
               char,
               Conditional<
-                BitRange<short, kBitMin, kBitMax>,  // NOLINT(runtime/int)
+                Bool<bits::InRange<short, kBitMin, kBitMax>()>,  // NOLINT(runtime/int)
                 short,  // NOLINT(runtime/int)
                 Conditional<
-                  BitRange<int, kBitMin, kBitMax>,
+                  Bool<bits::InRange<int, kBitMin, kBitMax>()>,
                   int,
                   Conditional<
-                    BitRange<long, kBitMin, kBitMax>,  // NOLINT(runtime/int)
+                    Bool<bits::InRange<long, kBitMin, kBitMax>()>,  // NOLINT(runtime/int)
                     long,  // NOLINT(runtime/int)
                     Conditional<
-                      BitRange<long long,  // NOLINT(runtime/int)
-                          kBitMin, kBitMax>,
+                      Bool<bits::InRange<long long,  // NOLINT(runtime/int)
+                          kBitMin, kBitMax>()>,
                       long long,  // NOLINT(runtime/int)
                       InvalidType>
                   >
@@ -279,10 +280,10 @@ typedef int_least_t<64>  int_least64_t;
 typedef int_least64_t    int_fast64_t;
 
 /// @brief An unsigned integer type of the same bit size as that of a pointer.
-typedef uint_least_t<BitSize<void*>::value> uintptr_t;
+typedef uint_least_t<bits::Size<void*>()> uintptr_t;
 
 /// @brief A signed integer type of the same bit size as that of a pointer.
-typedef int_least_t<BitSize<void*>::value> intptr_t;
+typedef int_least_t<bits::Size<void*>()> intptr_t;
 
 /// @brief A signed integer type able to represent the result of any valid
 /// pointer subtraction operation.
@@ -303,10 +304,10 @@ typedef pid_t pid_t;
 #endif
 
 /// @brief An unsigned integer type of the same bit size as that of a pid_t.
-typedef uint_least_t<BitSize<pid_t>::value> uintpid_t;
+typedef uint_least_t<bits::Size<pid_t>()> uintpid_t;
 
 /// @brief A signed integer type of the same bit size as that of a pid_t.
-typedef int_least_t<BitSize<pid_t>::value> intpid_t;
+typedef int_least_t<bits::Size<pid_t>()> intpid_t;
 
 #endif
 
