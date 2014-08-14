@@ -103,19 +103,21 @@ class IntegralLeastRangeSearch
         Invoke<PreferIntegralType<
           Invoke<PreferIntegralType<
             Conditional<
-              Bool<bits::InRange<char, kBitMin, kBitMax>()>,
+              Bool<Bits<char>::InRange<kBitMin, kBitMax>()>,
               char,
               Conditional<
-                Bool<bits::InRange<short, kBitMin, kBitMax>()>,  // NOLINT(runtime/int)
+                Bool<Bits<short>::InRange<  // NOLINT(runtime/int)
+                    kBitMin, kBitMax>()>,
                 short,  // NOLINT(runtime/int)
                 Conditional<
-                  Bool<bits::InRange<int, kBitMin, kBitMax>()>,
+                  Bool<Bits<int>::InRange<kBitMin, kBitMax>()>,
                   int,
                   Conditional<
-                    Bool<bits::InRange<long, kBitMin, kBitMax>()>,  // NOLINT(runtime/int)
+                    Bool<Bits<long>::InRange<  // NOLINT(runtime/int)
+                        kBitMin, kBitMax>()>,
                     long,  // NOLINT(runtime/int)
                     Conditional<
-                      Bool<bits::InRange<long long,  // NOLINT(runtime/int)
+                      Bool<Bits<long long>::InRange<  // NOLINT(runtime/int)
                           kBitMin, kBitMax>()>,
                       long long,  // NOLINT(runtime/int)
                       InvalidType>
@@ -280,10 +282,10 @@ typedef int_least_t<64>  int_least64_t;
 typedef int_least64_t    int_fast64_t;
 
 /// @brief An unsigned integer type of the same bit size as that of a pointer.
-typedef uint_least_t<bits::Size<void*>()> uintptr_t;
+typedef uint_least_t<Bits<void*>::Size()> uintptr_t;
 
 /// @brief A signed integer type of the same bit size as that of a pointer.
-typedef int_least_t<bits::Size<void*>()> intptr_t;
+typedef int_least_t<Bits<void*>::Size()> intptr_t;
 
 /// @brief A signed integer type able to represent the result of any valid
 /// pointer subtraction operation.
@@ -304,10 +306,10 @@ typedef pid_t pid_t;
 #endif
 
 /// @brief An unsigned integer type of the same bit size as that of a pid_t.
-typedef uint_least_t<bits::Size<pid_t>()> uintpid_t;
+typedef uint_least_t<Bits<pid_t>::Size()> uintpid_t;
 
 /// @brief A signed integer type of the same bit size as that of a pid_t.
-typedef int_least_t<bits::Size<pid_t>()> intpid_t;
+typedef int_least_t<Bits<pid_t>::Size()> intpid_t;
 
 #endif
 

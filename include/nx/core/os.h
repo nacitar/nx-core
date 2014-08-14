@@ -47,7 +47,7 @@
 #elif defined(_MSC_VER)
   /// @brief Set if the toolchain in use is visual studio
   #define NX_TC_VS 1
-  #include <intrin.h> // compiler intrinsics
+  #include <intrin.h>  // compiler intrinsics
   #pragma intrinsic(_BitScanForward)
   #pragma intrinsic(_BitScanForward64)
   #pragma intrinsic(_BitScanReverse)
