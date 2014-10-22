@@ -73,6 +73,18 @@
 /// @brief Library namespace.
 namespace nx {
 
+/// @brief Accepts a type and optionally a value of that type as a parameter.
+/// Can be used to make a boolean condition dependent upon an arbitrary
+/// template parameter by adding to it: && Depend<Type>()
+template <class T>
+NX_FORCEINLINE constexpr bool Depend() {
+  return true;
+}
+template <class T>
+NX_FORCEINLINE constexpr bool Depend(const T&) {
+  return true;
+}
+
 /// @brief A function pointer type returning the type Return and accepting the
 /// provided argument types.
 template <typename Return, typename... Arguments>
@@ -85,19 +97,28 @@ using MemberFunction = Return (Class::*)(Arguments...);
 
 // No need to invoke integral constants... they resolve to themselves!
 
+template <class T, T kValue>
+class Constant : public std::integral_constant<T, kValue> {
+};
+
 /// @brief Meta-constant boolean
 template <bool kValue>
-class Bool : public std::integral_constant<bool, kValue> {
+class Bool : public Constant<bool, kValue> {
 };
 
 /// @brief Meta-constant int
 template <int kValue>
-class Int : public std::integral_constant<int, kValue> {
+class Int : public Constant<int, kValue> {
 };
 
 /// @brief Meta-constant unsigned int
 template <unsigned int kValue>
-class UInt : public std::integral_constant<unsigned int, kValue> {
+class UInt : public Constant<unsigned int, kValue> {
+};
+
+/// @brief Meta-constant size_t
+template <size_t kValue>
+class Size : public Constant<size_t, kValue> {
 };
 
 /// @brief Meta-constant true value; equivalent to std::true_type
@@ -108,16 +129,6 @@ class True : public Bool<true> {
 class False : public Bool<false> {
 };
 
-/// @brief Accepts a type and optionally values of that type as template
-/// parameters.  Can be used to make a boolean condition dependent upon an
-/// arbitrary template parameter by adding to it: && Depend<Type>::value
-/// @details Other than the template arguments, Identical to the "True" type.
-template <class T, T... values>
-class Depend : public True {
-};
-template <class T>
-class Depend<T> : public True {
-};
 
 /// @brief Basic identity metafunction; provides the type unaltered. Useful for
 /// passing raw types to templates expecting a type member.
@@ -198,7 +209,7 @@ class CheckValidType<true, InvalidType, Fallback> : public Bool<false> {
  public:
   /// @brief Fallback, because T is not InvalidType
   typedef Fallback type;
-  static_assert(false && Depend<Fallback>::value,
+  static_assert(false && Depend<Fallback>(),
       "No type exists that fulfills the specified requirements.");
 };
 

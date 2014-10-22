@@ -34,8 +34,8 @@ class GenericBits {
  public:
   typedef T type;
 
-  static NX_FORCEINLINE constexpr unsigned int Size() {
-    return UInt<static_cast<unsigned int>(sizeof(T)*CHAR_BIT)>::value;
+  static NX_FORCEINLINE constexpr size_t Size() {
+    return ::nx::Size<static_cast<size_t>(sizeof(T)*CHAR_BIT)>::value;
   }
   static NX_FORCEINLINE constexpr bool InRange(
       unsigned int minimum, unsigned int maximum) {
@@ -60,6 +60,13 @@ class Bits : public GenericBits<T> {
 template <typename T>
 class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
  public:
+  static NX_FORCEINLINE constexpr T LowMask(unsigned int length) {
+    return ~((~static_cast<T>(0)) << length);
+  }
+  template <T length_>
+  static NX_FORCEINLINE constexpr T LowMask() {
+    return ~((~static_cast<T>(0)) << length_);
+  }
   static NX_FORCEINLINE constexpr bool MultiplicationOverflow(T kLHS, T kRHS) {
     return (kRHS != 0 && (static_cast<T>(kLHS * kRHS) / kRHS) != kLHS);
   }
@@ -112,7 +119,7 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
       static_assert(!MultiplicationOverflow<
           value_, Power<value_, power_ - 1>()>(),
           "Multiplication overflows when computing this exponentiation.");
-      return value_ * Power<value_, power_ - 1>();
+      return static_cast<T>(value_ * Power<value_, power_ - 1>());
     }
     template <T value_>
     static NX_FORCEINLINE constexpr EnableIf<
@@ -281,63 +288,63 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
   }
   template <unsigned int ... indexes_>
   static NX_FORCEINLINE constexpr T Mask() {
-    return Detail::Mask<indexes_...>();
+    return Detail::template Mask<indexes_...>();
   }
 
   // NOTE: intentionally omitting dynamic power
   template <T value_, unsigned int power_>
   static NX_FORCEINLINE constexpr T Power() {
-    return Detail::Power<value_, power_>();
+    return Detail::template Power<value_, power_>();
   }
 
   template <T value_>
   static NX_FORCEINLINE constexpr unsigned int ScanForward() {
-    return Detail::ScanForward<value_>();
+    return Detail::template ScanForward<value_>();
   }
   template <T value_>
   static NX_FORCEINLINE constexpr unsigned int ScanReverse() {
-    return Detail::ScanReverse<value_>();
+    return Detail::template ScanReverse<value_>();
   }
   template <T value_>
   static NX_FORCEINLINE constexpr unsigned int PopCount() {
-    return Detail::PopCount<value_>();
+    return Detail::template PopCount<value_>();
   }
 
   template <class PointerType>
   static NX_FORCEINLINE void assign(T mask, T value, PointerType* data) {
-    return Detail::assign<PointerType>(mask, value, data);
+    return Detail::template assign<PointerType>(mask, value, data);
   }
   template <T mask_, class PointerType>
   static NX_FORCEINLINE void assign(T value, PointerType* data) {
-    return Detail::assign<mask_, PointerType>(value, data);
+    return Detail::template assign<mask_, PointerType>(value, data);
   }
   template <T mask_, T value_, class PointerType>
   static NX_FORCEINLINE void assign(PointerType* data) {
-    return Detail::assign<mask_, value_, PointerType>(data);
+    return Detail::template assign<mask_, value_, PointerType>(data);
   }
   template <class PointerType>
   static NX_FORCEINLINE T get(T mask, PointerType* data) {
-    return Detail::get<PointerType>(mask, data);
+    return Detail::template get<PointerType>(mask, data);
   }
   template <T mask_, class PointerType>
   static NX_FORCEINLINE T get(PointerType* data) {
-    return Detail::get<mask_, PointerType>(data);
+    return Detail::template get<mask_, PointerType>(data);
   }
   template <class PointerType>
   static NX_FORCEINLINE void set(T mask, PointerType* data) {
-    Detail::set<PointerType>(mask, data);
+    Detail::template set<PointerType>(mask, data);
   }
   template <T mask_, class PointerType>
   static NX_FORCEINLINE void set(PointerType* data) {
-    Detail::set<mask_, PointerType>(data);
+    Detail::template set<mask_, PointerType>(data);
   }
   template <class PointerType>
   static NX_FORCEINLINE void clear(T mask, PointerType* data) {
-    Detail::clear<PointerType>(mask, data);
+    Detail::template clear<PointerType>(mask, data);
   }
   template <T mask_, class PointerType>
   static NX_FORCEINLINE void clear(PointerType* data) {
-    Detail::clear<mask_, PointerType>(data);
+    Detail::template clear<mask_, PointerType>(data);
   }
  private:
   NX_UNINSTANTIABLE(Bits);

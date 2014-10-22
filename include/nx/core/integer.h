@@ -291,10 +291,12 @@ typedef int_least_t<Bits<void*>::Size()> intptr_t;
 /// pointer subtraction operation.
 typedef std::ptrdiff_t ptrdiff_t;
 
+// TODO: need this typedef over in mpl
 /// @brief An unsigned integer type that can store the maximum size of a
 /// theoretically possible object of any type (including array).
 typedef std::size_t size_t;
 
+typedef std::make_signed<size_t>::type ssize_t;
 #ifndef NX_EMBEDDED
 
 #ifdef NX_TARGET_WINDOWS
