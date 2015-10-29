@@ -26,12 +26,7 @@
 #define INCLUDE_NX_CORE_MPL_H_
 
 #include "nx/core/os.h"
-
-#ifdef NX_EMBEDDED
-  #include "nx/core/embedded/type_traits.h"
-#else
-  #include <type_traits>
-#endif
+#include "nx/core/types.h"
 
 /// @brief Preprocessor text concatenation.
 #define NX_PP_CAT(x, y) NX_PP_CAT1(x, y)
@@ -119,6 +114,11 @@ class UInt : public Constant<unsigned int, kValue> {
 /// @brief Meta-constant size_t
 template <size_t kValue>
 class Size : public Constant<size_t, kValue> {
+};
+
+/// @brief Meta-constant ssize_t
+template <ssize_t kValue>
+class SSize : public Constant<ssize_t, kValue> {
 };
 
 /// @brief Meta-constant true value; equivalent to std::true_type
@@ -243,6 +243,14 @@ class SetSigned : public std::conditional<
  private:
   NX_UNINSTANTIABLE(SetSigned);
 };
+
+/// @brief Makes an integral type unsigned.
+template <typename T>
+using MakeUnsigned = Invoke<SetSigned<false, T>>;
+
+/// @brief Makes an integral type signed.
+template <typename T>
+using MakeSigned = Invoke<SetSigned<true, T>>;
 
 }  // namespace nx
 

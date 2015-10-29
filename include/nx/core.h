@@ -22,6 +22,7 @@
 #define INCLUDE_NX_CORE_H_
 
 #include "nx/core/os.h"
+#include "nx/core/types.h"
 #include "nx/core/mpl.h"
 #include "nx/core/integer.h"
 #include "nx/core/bits.h"

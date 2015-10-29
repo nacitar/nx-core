@@ -22,12 +22,7 @@
 #ifndef INCLUDE_NX_CORE_INTEGER_H_
 #define INCLUDE_NX_CORE_INTEGER_H_
 
-#ifndef NX_EMBEDDED
-#ifndef NX_TARGET_WINDOWS
-#include <sys/types.h>  // pid_t
-#endif
-#endif
-
+#include "nx/core/types.h"
 #include "nx/core/mpl.h"
 #include "nx/core/bits.h"
 
@@ -287,32 +282,12 @@ typedef uint_least_t<Bits<void*>::Size()> uintptr_t;
 /// @brief A signed integer type of the same bit size as that of a pointer.
 typedef int_least_t<Bits<void*>::Size()> intptr_t;
 
-/// @brief A signed integer type able to represent the result of any valid
-/// pointer subtraction operation.
-typedef std::ptrdiff_t ptrdiff_t;
-
-// TODO: need this typedef over in mpl
-/// @brief An unsigned integer type that can store the maximum size of a
-/// theoretically possible object of any type (including array).
-typedef std::size_t size_t;
-
-typedef std::make_signed<size_t>::type ssize_t;
 #ifndef NX_EMBEDDED
-
-#ifdef NX_TARGET_WINDOWS
-/// @brief A type capable of holding a process identifier.
-typedef DWORD pid_t;
-#else
-/// @brief A type capable of holding a process identifier.
-typedef pid_t pid_t;
-#endif
-
 /// @brief An unsigned integer type of the same bit size as that of a pid_t.
 typedef uint_least_t<Bits<pid_t>::Size()> uintpid_t;
 
 /// @brief A signed integer type of the same bit size as that of a pid_t.
 typedef int_least_t<Bits<pid_t>::Size()> intpid_t;
-
 #endif
 
 }  // namespace nx
