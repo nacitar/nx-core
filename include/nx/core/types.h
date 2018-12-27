@@ -33,7 +33,7 @@
 #include "nx/core/embedded/type_traits.h"
 #endif
 
-#include <cstddef> // size_t, ptrdiff_t
+#include <cstddef>  // size_t, ptrdiff_t
 
 /// @brief Library namespace.
 namespace nx {

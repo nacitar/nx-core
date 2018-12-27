@@ -102,84 +102,89 @@ template<class T, size_t N>
 struct is_array<T[N]> : true_type {};
 
 namespace detail {
-  template <class T>
-  struct is_integral_helper
-      : false_type {
-  };
-  template <>
-  struct is_integral_helper<char>
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<char16_t>
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<char32_t>
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<signed char>
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<unsigned char>
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<signed short>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<unsigned short>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<signed int>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<unsigned int>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<signed long>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<unsigned long>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<signed long long>  // NOLINT(runtime/int)
-      : true_type {
-  };
-  template <>
-  struct is_integral_helper<unsigned long long>  // NOLINT(runtime/int)
-      : true_type {
-  };
+
+template <class T>
+struct is_integral_helper
+    : false_type {
+};
+template <>
+struct is_integral_helper<char>
+    : true_type {
+};
+template <>
+struct is_integral_helper<char16_t>
+    : true_type {
+};
+template <>
+struct is_integral_helper<char32_t>
+    : true_type {
+};
+template <>
+struct is_integral_helper<signed char>
+    : true_type {
+};
+template <>
+struct is_integral_helper<unsigned char>
+    : true_type {
+};
+template <>
+struct is_integral_helper<signed short>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<unsigned short>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<signed int>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<unsigned int>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<signed long>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<unsigned long>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<signed long long>  // NOLINT(runtime/int)
+    : true_type {
+};
+template <>
+struct is_integral_helper<unsigned long long>  // NOLINT(runtime/int)
+    : true_type {
+};
+
 }  // namespace detail
+
 template <class T> struct is_integral
     : detail::is_integral_helper<typename remove_cv<T>::type> {
 };
 
 namespace detail {
-  template <class T, class Enable = void>
-  struct is_signed_helper : false_type {
-  };
-  template <class T>
-  struct is_signed_helper<T,
-      typename enable_if<(is_integral<T>::value)>::type>
-      : integral_constant<bool, (static_cast<T>(-1) < 0)> {
-  };
-  template <class T, class Enable = void>
-  struct is_unsigned_helper : false_type {
-  };
-  template <class T>
-  struct is_unsigned_helper<T,
-      typename enable_if<(is_integral<T>::value)>::type>
-      : integral_constant<bool, (static_cast<T>(-1) >= 0)> {
-  };
+
+template <class T, class Enable = void>
+struct is_signed_helper : false_type {
+};
+template <class T>
+struct is_signed_helper<T,
+    typename enable_if<(is_integral<T>::value)>::type>
+    : integral_constant<bool, (static_cast<T>(-1) < 0)> {
+};
+template <class T, class Enable = void>
+struct is_unsigned_helper : false_type {
+};
+template <class T>
+struct is_unsigned_helper<T,
+    typename enable_if<(is_integral<T>::value)>::type>
+    : integral_constant<bool, (static_cast<T>(-1) >= 0)> {
+};
+
 }  // namespace detail
 
 template <class T> struct is_signed
@@ -189,55 +194,58 @@ template <class T> struct is_unsigned
     : detail::is_unsigned_helper<typename remove_cv<T>::type> {
 };
 namespace detail {
-  template <class T, class Enable = void>
-  struct make_unsigned;
 
-  template <class T> struct make_unsigned<T,
-      typename enable_if<is_unsigned<T>::value>::type> {
-    typedef T type; };
+template <class T, class Enable = void>
+struct make_unsigned;
 
-  template <> struct make_unsigned<char> { typedef unsigned char type; };
-  template <> struct make_unsigned<signed char> { typedef unsigned char type; };
-  template <> struct make_unsigned<signed int> { typedef unsigned int type; };
-  template <> struct make_unsigned<signed long> {  // NOLINT(runtime/int)
-      typedef unsigned long type;  // NOLINT(runtime/int)
-  };
-  template <> struct make_unsigned<signed long long> {  // NOLINT(runtime/int)
-      typedef unsigned long long type;  // NOLINT(runtime/int)
-  };
+template <class T> struct make_unsigned<T,
+    typename enable_if<is_unsigned<T>::value>::type> {
+  typedef T type; };
 
-  template <class T, class Enable = void>
-  struct make_signed;
+template <> struct make_unsigned<char> { typedef unsigned char type; };
+template <> struct make_unsigned<signed char> { typedef unsigned char type; };
+template <> struct make_unsigned<signed int> { typedef unsigned int type; };
+template <> struct make_unsigned<signed long> {  // NOLINT(runtime/int)
+    typedef unsigned long type;  // NOLINT(runtime/int)
+};
+template <> struct make_unsigned<signed long long> {  // NOLINT(runtime/int)
+    typedef unsigned long long type;  // NOLINT(runtime/int)
+};
 
-  template <class T> struct make_signed<T,
-      typename enable_if<is_signed<T>::value>::type> {
-      typedef T type;
-  };
+template <class T, class Enable = void>
+struct make_signed;
 
-  template <> struct make_signed<char> { typedef signed char type; };
-  template <> struct make_signed<unsigned char> { typedef signed char type; };
-  template <> struct make_signed<unsigned int> { typedef signed int type; };
-  template <> struct make_signed<unsigned long> {  // NOLINT(runtime/int)
-      typedef signed long type;  // NOLINT(runtime/int)
-  };
-  template <> struct make_signed<unsigned long long> {  // NOLINT(runtime/int)
-      typedef signed long long type;  // NOLINT(runtime/int)
-  };
+template <class T> struct make_signed<T,
+    typename enable_if<is_signed<T>::value>::type> {
+    typedef T type;
+};
 
-  // TODO(nacitar): put this somewhere better?
-  template <class T, class V> struct match_cv {
-    typedef typename remove_cv<V>::type type;
-  };
-  template <class T, class V> struct match_cv<const volatile T, V> {
-    typedef typename add_cv<V>::type type;
-  };
-  template <class T, class V> struct match_cv<volatile T, V> {
-    typedef typename add_volatile<typename remove_const<V>::type>::type type;
-  };
-  template <class T, class V> struct match_cv<const T, V> {
-    typedef typename add_const<typename remove_volatile<V>::type>::type type;
-  };
+template <> struct make_signed<char> { typedef signed char type; };
+template <> struct make_signed<unsigned char> { typedef signed char type; };
+template <> struct make_signed<unsigned int> { typedef signed int type; };
+template <> struct make_signed<unsigned long> {  // NOLINT(runtime/int)
+    typedef signed long type;  // NOLINT(runtime/int)
+};
+template <> struct make_signed<unsigned long long> {  // NOLINT(runtime/int)
+    typedef signed long long type;  // NOLINT(runtime/int)
+};
+
+// TODO(nacitar): put this somewhere better?
+template <class T, class V> struct match_cv {
+  typedef typename remove_cv<V>::type type;
+};
+template <class T, class V> struct match_cv<const volatile T, V> {
+  typedef typename add_cv<V>::type type;
+};
+template <class T, class V> struct match_cv<volatile T, V> {
+  typedef typename add_volatile<typename remove_const<V>::type>::type type;
+};
+template <class T, class V> struct match_cv<const T, V> {
+  typedef typename add_const<typename remove_volatile<V>::type>::type type;
+};
+
 }  // namespace detail
+
 template <class T>
 struct make_unsigned {
   typedef typename detail::match_cv<T,
@@ -291,9 +299,12 @@ template <class T> struct is_reference<T&&> : true_type {};
 
 
 namespace detail {
-  template< class T > struct is_pointer_helper     : false_type {};
-  template< class T > struct is_pointer_helper<T*> : true_type {};
+
+template< class T > struct is_pointer_helper     : false_type {};
+template< class T > struct is_pointer_helper<T*> : true_type {};
+
 }  // namespace detail
+
 template< class T > struct is_pointer
     : detail::is_pointer_helper<typename remove_cv<T>::type> {};
 
@@ -397,7 +408,7 @@ struct add_rvalue_reference {
 */
 template<typename _Tp>
 constexpr typename remove_reference<_Tp>::type&&
-    move(_Tp&& __t) noexcept {
+    move(_Tp&& __t) noexcept {  // NOLINT(build/include_what_you_use)
   return static_cast<typename remove_reference<_Tp>::type&&>(__t);
 }
 /**
@@ -407,7 +418,8 @@ constexpr typename remove_reference<_Tp>::type&&
  *  This function is used to implement "perfect forwarding".
  */
 template<typename _Tp>
-constexpr _Tp&& forward(typename remove_reference<_Tp>::type&& __t) noexcept {
+constexpr _Tp&& forward(  // NOLINT(build/include_what_you_use)
+    typename remove_reference<_Tp>::type&& __t) noexcept {
   static_assert(!is_lvalue_reference<_Tp>::value, "template argument"
       " substituting _Tp is an lvalue reference type");
   return static_cast<_Tp&&>(__t);

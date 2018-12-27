@@ -183,7 +183,8 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
     static NX_FORCEINLINE EnableIf<Bool<
             mask_ != static_cast<T>(0) &&  // not empty
             mask_ != ~static_cast<T>(0) &&  // not full
-            (mask_ & value_) == mask_>,  // all bits set
+            (mask_ & value_)  // NOLINT(runtime/references)
+                == mask_>,  // all bits set
         void> assign(PointerType* data) {
       // bit mask, all bits set - or
       *data |= mask_;
@@ -192,7 +193,8 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
     static NX_FORCEINLINE EnableIf<Bool<
             mask_ != static_cast<T>(0) &&  // not empty
             mask_ != ~static_cast<T>(0) &&  // not full
-            (mask_ & value_) == static_cast<T>(0)>,  // all bits unset
+            (mask_ & value_)  // NOLINT(runtime/references)
+                == static_cast<T>(0)>,  // all bits unset
         void> assign(PointerType* data) {
       // bit mask, all bits unset - and inverted mask
       *data &= ~mask_;
@@ -201,8 +203,10 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
     static NX_FORCEINLINE EnableIf<Bool<
             mask_ != static_cast<T>(0) &&  // not empty
             mask_ != ~static_cast<T>(0) &&  // not full
-            (mask_ & value_) != static_cast<T>(0) &&  // all bits not unset
-            (mask_ & value_) != mask_>,  // all bits not set
+            (mask_ & value_)  // NOLINT(runtime/references)
+                != static_cast<T>(0) &&  // all bits not unset
+            (mask_ & value_)  // NOLINT(runtime/references)
+                != mask_>,  // all bits not set
         void> assign(PointerType* data) {
       // being extra sure that the 'and' is optimized out
       typedef std::integral_constant<T, (value_ & mask_)> masked_value;
@@ -336,7 +340,8 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
   }
   template <T mask_, class PointerType>
   static NX_FORCEINLINE void set(PointerType* data) {
-    Detail::template set<mask_, PointerType>(data);
+    Detail::template set<  // NOLINT(build/include_what_you_use)
+        mask_, PointerType>(data);
   }
   template <class PointerType>
   static NX_FORCEINLINE void clear(T mask, PointerType* data) {
@@ -346,6 +351,7 @@ class Bits<T, EnableIf<std::is_integral<T>>> : public GenericBits<T> {
   static NX_FORCEINLINE void clear(PointerType* data) {
     Detail::template clear<mask_, PointerType>(data);
   }
+
  private:
   NX_UNINSTANTIABLE(Bits);
 };
