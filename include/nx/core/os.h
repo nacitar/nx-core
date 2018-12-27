@@ -22,47 +22,6 @@
 
 #include <limits.h>  // CHAR_BIT and PATH_MAX (on linux)
 
-// Toolchain detection
-#if defined(__clang__)
-  /// @brief Set if the toolchain in use is Clang
-  #define NX_TC_CLANG 1
-#elif defined(__GNUC__)
-  #ifndef __has_attribute
-    #define __has_attribute(x) 0
-  #endif
-  #ifndef __has_builtin
-    #define __has_builtin(x) 0
-  #endif
-  #ifndef __has_extension
-    #define __has_extension(x) 0
-  #endif
-  /// @brief Set to GCC's version number as an integer if using GCC
-  #define NX_TC_GCC (__GNUC__ * 10000 \
-      + __GNUC_MINOR__ * 100 \
-      + __GNUC_PATCHLEVEL__)
-  #if (NX_TC_GCC == 0)
-    #warning "Could not get GCC version number accurately"
-    #define NX_TC_GCC 1
-  #endif
-#elif defined(_MSC_VER)
-  /// @brief Set if the toolchain in use is visual studio
-  #define NX_TC_VS 1
-  #include <intrin.h>  // compiler intrinsics
-  #pragma intrinsic(_BitScanForward)
-  #pragma intrinsic(_BitScanForward64)
-  #pragma intrinsic(_BitScanReverse)
-  #pragma intrinsic(_BitScanReverse64)
-  #pragma intrinsic(__popcnt)
-  #pragma intrinsic(__popcnt16)
-  #pragma intrinsic(__popcnt64)
-#endif
-
-// C++11 requirement
-#if (__cplusplus < 201103L) || (defined(NX_TC_GCC) && NX_TC_GCC < 40801)
-  #error "This library is written with c++11 in mind; backward" \
-      " compatibility has been removed.  If using gcc, this requires 4.8.1+"
-#endif
-
 // Target detection
 #if \
     defined(WINDOWS) || \
@@ -90,6 +49,51 @@
 #else
   /// @brief Defined if build target is an unknown platform
   #define NX_TARGET_OTHER 1
+#endif
+
+// Toolchain detection
+#if defined(__clang__)
+  /// @brief Set if the toolchain in use is Clang
+  #define NX_TC_CLANG 1
+#elif defined(__GNUC__)
+  #ifndef __has_attribute
+    #define __has_attribute(x) 0
+  #endif
+  #ifndef __has_builtin
+    #define __has_builtin(x) 0
+  #endif
+  #ifndef __has_extension
+    #define __has_extension(x) 0
+  #endif
+  /// @brief Set to GCC's version number as an integer if using GCC
+  #define NX_TC_GCC (__GNUC__ * 10000 \
+      + __GNUC_MINOR__ * 100 \
+      + __GNUC_PATCHLEVEL__)
+  #if (NX_TC_GCC == 0)
+    #warning "Could not get GCC version number accurately"
+    #define NX_TC_GCC 1
+  #endif
+  // Indicate if mingw variant of gcc is in use
+  #if defined(NX_TARGET_WINDOWS)
+    #define NX_MINGW 1
+  #endif
+#elif defined(_MSC_VER)
+  /// @brief Set if the toolchain in use is visual studio
+  #define NX_TC_VS 1
+  #include <intrin.h>  // compiler intrinsics
+  #pragma intrinsic(_BitScanForward)
+  #pragma intrinsic(_BitScanForward64)
+  #pragma intrinsic(_BitScanReverse)
+  #pragma intrinsic(_BitScanReverse64)
+  #pragma intrinsic(__popcnt)
+  #pragma intrinsic(__popcnt16)
+  #pragma intrinsic(__popcnt64)
+#endif
+
+// C++11 requirement
+#if (__cplusplus < 201103L) || (defined(NX_TC_GCC) && NX_TC_GCC < 40801)
+  #error "This library is written with c++11 in mind; backward" \
+      " compatibility has been removed.  If using gcc, this requires 4.8.1+"
 #endif
 
 // Compiler features
