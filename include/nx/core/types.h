@@ -22,22 +22,22 @@
 
 #include "nx/core/os.h"
 
-#ifndef NX_EMBEDDED
-#include <type_traits>
-#ifndef NX_TARGET_WINDOWS
-#include <sys/types.h>  // pid_t
-#endif
-#include <cstddef>  // size_t, ptrdiff_t
-#else
-// Embedded has its own type_traits impl
-#include "nx/core/embedded/type_traits.h"
-// No cstddef either.
+
+#if defined(NX_EMBEDDED)
+// Embedded lacks cstddef.
 #include <stddef.h>  // size_t, ptrdiff_t
-namespace std
-{
+namespace std {
   using ::ptrdiff_t;
   using ::size_t;
 }
+// Embedded has its own type_traits impl
+#include "nx/core/embedded/type_traits.h"
+#else
+#if !defined(NX_TARGET_WINDOWS)
+#include <sys/types.h>  // pid_t
+#endif
+#include <type_traits>
+#include <cstddef>  // size_t, ptrdiff_t
 #endif
 
 
