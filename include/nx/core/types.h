@@ -27,13 +27,19 @@
 #ifndef NX_TARGET_WINDOWS
 #include <sys/types.h>  // pid_t
 #endif
-
+#include <cstddef>  // size_t, ptrdiff_t
 #else
 // Embedded has its own type_traits impl
 #include "nx/core/embedded/type_traits.h"
+// No cstddef either.
+#include <stddef.h>  // size_t, ptrdiff_t
+namespace std
+{
+  using ::ptrdiff_t;
+  using ::size_t;
+}
 #endif
 
-#include <cstddef>  // size_t, ptrdiff_t
 
 /// @brief Library namespace.
 namespace nx {
